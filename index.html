@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー11</h1>
+    <h1>出すツールメーカー12</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -145,36 +145,36 @@
         }
 
         document.getElementById('downloadZip').addEventListener('click', async () => {
-            const zip = new JSZip();
-            
-            const gameJson = await loadGameJson();
-            Object.keys(images).forEach(key => {
-                gameJson.assets[key].path = images[key].replace("game/files/", "files/");
-                const imgElement = document.getElementById(key);
-                gameJson.assets[key].width = imgElement.naturalWidth;
-                gameJson.assets[key].height = imgElement.naturalHeight;
-            });
-            zip.file("game.json", JSON.stringify(gameJson, null, 2));
+		    const zip = new JSZip();
 
-            const fetchPromises = Object.keys(images).map(async key => {
-                const imgDataUrl = images[key];
-                const blob = await fetch(imgDataUrl).then(res => res.blob());
-                const fileName = imgDataUrl.split('/').pop();
-                zip.file(`files/${fileName}`, blob);
-            });
+		    const gameJson = await loadGameJson();
+		    Object.keys(images).forEach(key => {
+		        gameJson.assets[key].path = images[key].replace("game/files/", "files/");
+		        const imgElement = document.getElementById(key);
+		        gameJson.assets[key].width = imgElement.naturalWidth;
+		        gameJson.assets[key].height = imgElement.naturalHeight;
+		    });
+		    zip.file("game.json", JSON.stringify(gameJson, null, 2));
 
-            fetchPromises.push((async () => {
-                const response = await fetch('game/files/f086925699839f7a9594.js');
-                const blob = await response.blob();
-                zip.file('files/f086925699839f7a9594.js', blob);
-            })());
+		    const fetchPromises = Object.keys(images).map(async key => {
+		        const imgDataUrl = images[key];
+		        const blob = await fetch(imgDataUrl).then(res => res.blob());
+		        const fileName = imgDataUrl.split('/').pop();
+		        zip.file(`files/${fileName}`, blob);
+		    });
 
-            await Promise.all(fetchPromises);
+		    fetchPromises.push((async () => {
+		        const response = await fetch('game/files/f086925699839f7a9594.js');
+		        const blob = await response.blob();
+		        zip.file('files/f086925699839f7a9594.js', blob);
+		    })());
 
-            zip.generateAsync({ type: "blob" }).then(content => {
-                saveAs(content, "game.zip");
-            });
-        });
+		    await Promise.all(fetchPromises);
+
+		    zip.generateAsync({ type: "blob" }).then(content => {
+		        saveAs(content, "game.zip");
+		    });
+		});
     </script>
 </body>
 </html>
