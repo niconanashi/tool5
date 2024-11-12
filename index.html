@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー2</h1>
+    <h1>出すツールメーカー3</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -144,39 +144,42 @@
             images[assetKey] = dataUrl;  // データURLを保持
         }
 
-        document.getElementById('downloadZip').addEventListener('click', async () => {
-            const zip = new JSZip();
+		document.getElementById('downloadZip').addEventListener('click', async () => {
+		    const zip = new JSZip();
 
-            const gameJson = await loadGameJson();
-            Object.keys(images).forEach(key => {
-                gameJson.assets[key].path = images[key].replace("game/files/", "files/");
-                const imgElement = document.getElementById(key);
-                gameJson.assets[key].width = imgElement.naturalWidth;
-                gameJson.assets[key].height = imgElement.naturalHeight;
-            });
-            zip.file("game.json", JSON.stringify(gameJson, null, 2));
+		    const gameJson = await loadGameJson();
+		    Object.keys(images).forEach(key => {
+		        const originalPath = key === "heart" ? "files/7a2ab68a73d9c342194f.png" : 
+		                           key === "spade" ? "files/0a4f4e23e96f55a99aa6.png" : 
+		                           key === "sparkle" ? "files/1312499bd538f8780d58.png" : "";
+		        gameJson.assets[key].path = originalPath;  // 元のパスを保持
+		        const imgElement = document.getElementById(key);
+		        gameJson.assets[key].width = imgElement.naturalWidth;
+		        gameJson.assets[key].height = imgElement.naturalHeight;
+		    });
+		    zip.file("game.json", JSON.stringify(gameJson, null, 2));
 
-            const fetchPromises = Object.keys(images).map(async key => {
-                const imgDataUrl = images[key];  // データURLを使用
-                const blob = await fetch(imgDataUrl).then(res => res.blob());
-                const originalFileName = key === "heart" ? "7a2ab68a73d9c342194f.png" : 
-                                        key === "spade" ? "0a4f4e23e96f55a99aa6.png" : 
-                                        key === "sparkle" ? "1312499bd538f8780d58.png" : "";
-                zip.file(`files/${originalFileName}`, blob);  // 元のファイル名で保存
-            });
+		    const fetchPromises = Object.keys(images).map(async key => {
+		        const imgDataUrl = images[key];  // 画像データURL
+		        const blob = await fetch(imgDataUrl).then(res => res.blob());
+		        const originalFileName = key === "heart" ? "7a2ab68a73d9c342194f.png" : 
+		                                key === "spade" ? "0a4f4e23e96f55a99aa6.png" : 
+		                                key === "sparkle" ? "1312499bd538f8780d58.png" : "";
+		        zip.file(originalFileName, blob);  // 元のファイル名で保存
+		    });
 
-            fetchPromises.push((async () => {
-                const response = await fetch('game/files/f086925699839f7a9594.js');
-                const blob = await response.blob();
-                zip.file('files/f086925699839f7a9594.js', blob);
-            })());
+		    fetchPromises.push((async () => {
+		        const response = await fetch('game/files/f086925699839f7a9594.js');
+		        const blob = await response.blob();
+		        zip.file('files/f086925699839f7a9594.js', blob);
+		    })());
 
-            await Promise.all(fetchPromises);
+		    await Promise.all(fetchPromises);
 
-            zip.generateAsync({ type: "blob" }).then(content => {
-                saveAs(content, "game.zip");
-            });
-        });
+		    zip.generateAsync({ type: "blob" }).then(content => {
+		        saveAs(content, "game.zip");
+		    });
+		});
     </script>
 </body>
 </html>
