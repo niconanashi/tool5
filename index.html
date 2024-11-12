@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー4</h1>
+    <h1>出すツールメーカー5</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -55,18 +55,18 @@
         <li>変更した内容を含むZIPファイルをダウンロードボタンを押してダウンロードします。</li>
         <li>ダウンロードしたファイルをニコ生ゲームとして投稿します。</li>
     </ol>
-    <p>※画像はJPGまたはPNG形式で、幅と高さが10ピクセル以上500ピクセル以下である必要があります。</p>
+    <p>※画像はPNG形式で、幅と高さが10ピクセル以上500ピクセル以下である必要があります。</p>
     <div class="image-container">
         <div>
-            <img id="heart" src="game/files/7a2ab68a73d9c342194f.png" alt="heart">
+            <img id="heart" src="game/files/heart.png" alt="heart">
             <textarea></textarea>
         </div>
         <div>
-            <img id="spade" src="game/files/0a4f4e23e96f55a99aa6.png" alt="spade">
+            <img id="spade" src="game/files/spade.png" alt="spade">
             <textarea></textarea>
         </div>
         <div>
-            <img id="sparkle" src="game/files/1312499bd538f8780d58.png" alt="sparkle">
+            <img id="sparkle" src="game/files/sparkle.png" alt="sparkle">
             <textarea></textarea>
         </div>
     </div>
@@ -75,9 +75,9 @@
 
     <script>
         const images = {
-            "heart": "game/files/7a2ab68a73d9c342194f.png",
-            "spade": "game/files/0a4f4e23e96f55a99aa6.png",
-            "sparkle": "game/files/1312499bd538f8780d58.png"
+            "heart": "game/files/heart.png",
+            "spade": "game/files/spade.png",
+            "sparkle": "game/files/sparkle.png"
         };
 
         document.querySelectorAll('.image-container div').forEach(div => {
@@ -114,8 +114,8 @@
             const warningDiv = document.getElementById('warning');
             warningDiv.textContent = '';
 
-            if (!file.type.startsWith('image/png') && !file.type.startsWith('image/jpeg')) {
-                warningDiv.textContent = 'エラー：サポートされている画像形式はPNGおよびJPGのみです。';
+            if (!file.type.startsWith('image/png')) {
+                warningDiv.textContent = 'エラー：サポートされている画像形式はPNGのみです。';
                 return;
             }
 
@@ -141,7 +141,7 @@
         function updateImage(target, dataUrl) {
             target.src = dataUrl;
             const assetKey = target.id;
-            images[assetKey] = dataUrl;  // データURLを保持
+            images[assetKey] = dataUrl;
         }
 
 		document.getElementById('downloadZip').addEventListener('click', async () => {
@@ -149,10 +149,7 @@
 
 		    const gameJson = await loadGameJson();
 		    Object.keys(images).forEach(key => {
-		        const originalPath = key === "heart" ? "files/7a2ab68a73d9c342194f.png" : 
-		                           key === "spade" ? "files/0a4f4e23e96f55a99aa6.png" : 
-		                           key === "sparkle" ? "files/1312499bd538f8780d58.png" : "";
-		        gameJson.assets[key].path = originalPath;  // 元のパスを保持
+		        gameJson.assets[key].path = key;
 		        const imgElement = document.getElementById(key);
 		        gameJson.assets[key].width = imgElement.naturalWidth;
 		        gameJson.assets[key].height = imgElement.naturalHeight;
@@ -160,18 +157,15 @@
 		    zip.file("game.json", JSON.stringify(gameJson, null, 2));
 
 		    const fetchPromises = Object.keys(images).map(async key => {
-		        const imgDataUrl = images[key];  // 画像データURL
+		        const imgDataUrl = images[key];
 		        const blob = await fetch(imgDataUrl).then(res => res.blob());
-		        const originalFileName = key === "heart" ? "7a2ab68a73d9c342194f.png" : 
-		                                key === "spade" ? "0a4f4e23e96f55a99aa6.png" : 
-		                                key === "sparkle" ? "1312499bd538f8780d58.png" : "";
-		        zip.file(`files/${originalFileName}`, blob);  // 元のファイル名で保存
+		        zip.file(`files/${key}`, blob);
 		    });
 
 		    fetchPromises.push((async () => {
-		        const response = await fetch('game/files/f086925699839f7a9594.js');
+		        const response = await fetch('game/files/main.js');
 		        const blob = await response.blob();
-		        zip.file('files/f086925699839f7a9594.js', blob);
+		        zip.file('files/main.js', blob);
 		    })());
 
 		    await Promise.all(fetchPromises);
