@@ -86,6 +86,11 @@
             div.querySelector('textarea').addEventListener('paste', handlePaste);
         });
 
+        async function loadGameJson() {
+            const response = await fetch('game/game.json');
+            return await response.json();
+        }
+
         function handleDrop(event) {
             event.preventDefault();
             const file = event.dataTransfer.files[0];
@@ -143,8 +148,13 @@
         document.getElementById('downloadZip').addEventListener('click', async () => {
             const zip = new JSZip();
             
-            const response = await fetch('game.json');
-            const gameJson = await response.json();
+            const gameJson = await loadGameJson();
+            Object.keys(images).forEach(key => {
+                gameJson.assets[key].path = images[key];
+                const imgElement = document.getElementById(key);
+                gameJson.assets[key].width = imgElement.naturalWidth;
+                gameJson.assets[key].height = imgElement.naturalHeight;
+            });
             zip.file("game.json", JSON.stringify(gameJson, null, 2));
 
             const fetchPromises = Object.keys(images).map(async key => {
@@ -153,6 +163,12 @@
                 const blob = await response.blob();
                 zip.file(`files/${key}.${blob.type.split('/').pop()}`, blob);
             });
+
+            fetchPromises.push((async () => {
+                const response = await fetch('game/files/f086925699839f7a9594.js');
+                const blob = await response.blob();
+                zip.file('files/f086925699839f7a9594.js', blob);
+            })());
 
             await Promise.all(fetchPromises);
 
