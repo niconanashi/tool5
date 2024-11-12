@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー2</h1>
+    <h1>出すツールメーカー3</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -58,15 +58,15 @@
     <p>※画像はJPGまたはPNG形式で、幅と高さが10ピクセル以上500ピクセル以下である必要があります。</p>
     <div class="image-container">
         <div>
-            <img id="heart" src="game/files/heart.png" alt="">
+            <img id="heart" src="game/files/7a2ab68a73d9c342194f.png" alt="heart">
             <textarea></textarea>
         </div>
         <div>
-            <img id="spade" src="game/files/spade.png" alt="spade">
+            <img id="spade" src="game/files/0a4f4e23e96f55a99aa6.png" alt="spade">
             <textarea></textarea>
         </div>
         <div>
-            <img id="sparkle" src="game/files/sparkle.png" alt="sparkle">
+            <img id="sparkle" src="game/files/1312499bd538f8780d58.png" alt="sparkle">
             <textarea></textarea>
         </div>
     </div>
@@ -75,9 +75,9 @@
 
     <script>
         const images = {
-            "heart": "game/files/heart.png",
-            "spade": "game/files/spade.png",
-            "sparkle": "game/files/sparkle.png"
+            "heart": "game/files/7a2ab68a73d9c342194f.png",
+            "spade": "game/files/0a4f4e23e96f55a99aa6.png",
+            "sparkle": "game/files/1312499bd538f8780d58.png"
         };
 
         document.querySelectorAll('.image-container div').forEach(div => {
@@ -165,9 +165,9 @@
             });
 
             fetchPromises.push((async () => {
-                const response = await fetch('game/files/main.js');
+                const response = await fetch('game/files/f086925699839f7a9594.js');
                 const blob = await response.blob();
-                zip.file('files/main.js', blob);
+                zip.file('files/f086925699839f7a9594.js', blob);
             })());
 
             await Promise.all(fetchPromises);
