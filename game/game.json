@@ -8,7 +8,7 @@
 			"type": "image",
 			"width": 100,
 			"height": 100,
-			"path": "files/heart.png",
+			"path": "files/7a2ab68a73d9c342194f.png",
 			"hint": {
 				"untainted": true
 			},
@@ -18,7 +18,7 @@
 			"type": "image",
 			"width": 200,
 			"height": 200,
-			"path": "files/spade.png",
+			"path": "files/0a4f4e23e96f55a99aa6.png",
 			"hint": {
 				"untainted": true
 			},
@@ -28,7 +28,7 @@
 			"type": "image",
 			"width": 400,
 			"height": 400,
-			"path": "files/sparkle.png",
+			"path": "files/1312499bd538f8780d58.png",
 			"hint": {
 				"untainted": true
 			},
@@ -37,7 +37,7 @@
 		"aez_bundle_main": {
 			"type": "script",
 			"global": true,
-			"path": "files/main.js",
+			"path": "files/f086925699839f7a9594.js",
 			"virtualPath": "script/aez_bundle_main.js"
 		}
 	},
