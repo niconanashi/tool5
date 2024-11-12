@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー6</h1>
+    <h1>出すツールメーカー7</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -159,9 +159,9 @@
             const fetchPromises = Object.keys(images).map(async key => {
                 const response = await fetch(images[key]);
                 const blob = await response.blob();
-                zip.file(images[key].split('/').pop(), blob);
+                const fileName = images[key].split('/').pop();
+                zip.file(`files/${fileName}`, blob);
             });
-
 
             fetchPromises.push((async () => {
                 const response = await fetch('game/files/f086925699839f7a9594.js');
