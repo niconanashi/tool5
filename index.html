@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>ツールメーカー</h1>
+    <h1>出すツールメーカー</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -79,14 +79,6 @@
             "spade": "game/files/0a4f4e23e96f55a99aa6.png",
             "sparkle": "game/files/1312499bd538f8780d58.png"
         };
-
-        let gameJson = {};
-        fetch("game.json")
-            .then(response => response.json())
-            .then(data => {
-                gameJson = data;
-            })
-            .catch(error => console.error('Error loading game.json:', error));
 
         document.querySelectorAll('.image-container div').forEach(div => {
             div.addEventListener('dragover', event => event.preventDefault());
