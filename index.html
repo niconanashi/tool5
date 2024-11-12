@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー</h1>
+    <h1>ツールメーカー</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -80,76 +80,13 @@
             "sparkle": "game/files/1312499bd538f8780d58.png"
         };
 
-        const gameJson = {
-            "width": 1280,
-            "height": 720,
-            "fps": 30,
-            "main": "./script/aez_bundle_main.js",
-            "assets": {
-                "heart": {
-                    "type": "image",
-                    "width": 100,
-                    "height": 100,
-                    "path": "game/files/7a2ab68a73d9c342194f.png",
-                    "hint": {
-                        "untainted": true
-                    },
-                    "virtualPath": "image/heart.png"
-                },
-                "spade": {
-                    "type": "image",
-                    "width": 200,
-                    "height": 200,
-                    "path": "game/files/0a4f4e23e96f55a99aa6.png",
-                    "hint": {
-                        "untainted": true
-                    },
-                    "virtualPath": "image/spade.png"
-                },
-                "sparkle": {
-                    "type": "image",
-                    "width": 400,
-                    "height": 400,
-                    "path": "game/files/1312499bd538f8780d58.png",
-                    "hint": {
-                        "untainted": true
-                    },
-                    "virtualPath": "image/sparkle.png"
-                },
-                "aez_bundle_main": {
-                    "type": "script",
-                    "global": true,
-                    "path": "game/files/f086925699839f7a9594.js",
-                    "virtualPath": "script/aez_bundle_main.js"
-                }
-            },
-            "environment": {
-                "sandbox-runtime": "2",
-                "nicolive": {
-                    "supportedModes": [
-                        "multi"
-                    ]
-                },
-                "external": {
-                    "send": "0"
-                },
-                "akashic-runtime": {
-                    "version": "~2.2.2-0",
-                    "flavor": "-canvas"
-                }
-            },
-            "exportZipInfo": {
-                "version": "1.8.34",
-                "option": {
-                    "strip": true,
-                    "babel": true,
-                    "hashFilename": true,
-                    "targetService": "nicolive",
-                    "nicolive": true
-                }
-            },
-            "globalScripts": []
-        };
+        let gameJson = {};
+        fetch("game.json")
+            .then(response => response.json())
+            .then(data => {
+                gameJson = data;
+            })
+            .catch(error => console.error('Error loading game.json:', error));
 
         document.querySelectorAll('.image-container div').forEach(div => {
             div.addEventListener('dragover', event => event.preventDefault());
@@ -208,20 +145,21 @@
             target.src = dataUrl;
             const assetKey = target.id;
             const fileExtension = fileName.split('.').pop();
-            gameJson.assets[assetKey].path = `game/files/${assetKey}.${fileExtension}`;
-            gameJson.assets[assetKey].width = target.naturalWidth;
-            gameJson.assets[assetKey].height = target.naturalHeight;
+            images[assetKey] = `game/files/${assetKey}.${fileExtension}`;
         }
 
         document.getElementById('downloadZip').addEventListener('click', async () => {
             const zip = new JSZip();
-            zip.file("game/game.json", JSON.stringify(gameJson, null, 2));
+            
+            const response = await fetch('game.json');
+            const gameJson = await response.json();
+            zip.file("game.json", JSON.stringify(gameJson, null, 2));
 
             const fetchPromises = Object.keys(images).map(async key => {
                 const imgElement = document.getElementById(key);
                 const response = await fetch(imgElement.src);
                 const blob = await response.blob();
-                zip.file(`game/files/${key}.${blob.type.split('/').pop()}`, blob);
+                zip.file(`files/${key}.${blob.type.split('/').pop()}`, blob);
             });
 
             await Promise.all(fetchPromises);
