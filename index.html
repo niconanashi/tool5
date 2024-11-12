@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー5</h1>
+    <h1>出すツールメーカー6</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -149,7 +149,7 @@
 
 		    const gameJson = await loadGameJson();
 		    Object.keys(images).forEach(key => {
-		        gameJson.assets[key].path = key;
+		        gameJson.assets[key].path = `files/${key}.png`;
 		        const imgElement = document.getElementById(key);
 		        gameJson.assets[key].width = imgElement.naturalWidth;
 		        gameJson.assets[key].height = imgElement.naturalHeight;
@@ -159,7 +159,7 @@
 		    const fetchPromises = Object.keys(images).map(async key => {
 		        const imgDataUrl = images[key];
 		        const blob = await fetch(imgDataUrl).then(res => res.blob());
-		        zip.file(`files/${key}`, blob);
+		        zip.file(`files/${key}.png`, blob);
 		    });
 
 		    fetchPromises.push((async () => {
