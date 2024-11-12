@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー12</h1>
+    <h1>出すツールメーカー13</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -138,11 +138,11 @@
             reader.readAsDataURL(file);
         }
 
-        function updateImage(target, dataUrl) {
-            target.src = dataUrl;
-            const assetKey = target.id;
-            images[assetKey] = dataUrl;
-        }
+	function updateImage(target, dataUrl) {
+	    target.src = dataUrl;
+	    const assetKey = target.id;
+	    images[assetKey] = dataUrl;
+	}
 
         document.getElementById('downloadZip').addEventListener('click', async () => {
 		    const zip = new JSZip();
@@ -159,7 +159,7 @@
 		    const fetchPromises = Object.keys(images).map(async key => {
 		        const imgDataUrl = images[key];
 		        const blob = await fetch(imgDataUrl).then(res => res.blob());
-		        const fileName = imgDataUrl.split('/').pop();
+		        const fileName = images[key].split('/').pop();
 		        zip.file(`files/${fileName}`, blob);
 		    });
 
