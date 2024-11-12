@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NicoNico Game ZIP Creator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        .image-container {
+            display: flex;
+            gap: 10px;
+        }
+        .image-container img {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="image-container">
+        <img id="heart" src="game/files/7a2ab68a73d9c342194f.png" alt="heart" draggable="true">
+        <img id="spade" src="game/files/0a4f4e23e96f55a99aa6.png" alt="spade" draggable="true">
+        <img id="sparkle" src="game/files/1312499bd538f8780d58.png" alt="sparkle" draggable="true">
+    </div>
+    <button id="downloadZip">Download game.zip</button>
+    <div id="warning" style="color: red;"></div>
+
+    <script>
+        const images = {
+            "heart": "game/files/7a2ab68a73d9c342194f.png",
+            "spade": "game/files/0a4f4e23e96f55a99aa6.png",
+            "sparkle": "game/files/1312499bd538f8780d58.png"
+        };
+
+        const gameJson = {
+            "width": 1280,
+            "height": 720,
+            "fps": 30,
+            "main": "./script/aez_bundle_main.js",
+            "assets": {
+                "heart": {
+                    "type": "image",
+                    "width": 100,
+                    "height": 100,
+                    "path": "game/files/7a2ab68a73d9c342194f.png",
+                    "hint": {
+                        "untainted": true
+                    },
+                    "virtualPath": "image/heart.png"
+                },
+                "spade": {
+                    "type": "image",
+                    "width": 200,
+                    "height": 200,
+                    "path": "game/files/0a4f4e23e96f55a99aa6.png",
+                    "hint": {
+                        "untainted": true
+                    },
+                    "virtualPath": "image/spade.png"
+                },
+                "sparkle": {
+                    "type": "image",
+                    "width": 400,
+                    "height": 400,
+                    "path": "game/files/1312499bd538f8780d58.png",
+                    "hint": {
+                        "untainted": true
+                    },
+                    "virtualPath": "image/sparkle.png"
+                },
+                "aez_bundle_main": {
+                    "type": "script",
+                    "global": true,
+                    "path": "game/files/f086925699839f7a9594.js",
+                    "virtualPath": "script/aez_bundle_main.js"
+                }
+            },
+            "environment": {
+                "sandbox-runtime": "2",
+                "nicolive": {
+                    "supportedModes": [
+                        "multi"
+                    ]
+                },
+                "external": {
+                    "send": "0"
+                },
+                "akashic-runtime": {
+                    "version": "~2.2.2-0",
+                    "flavor": "-canvas"
+                }
+            },
+            "exportZipInfo": {
+                "version": "1.8.34",
+                "option": {
+                    "strip": true,
+                    "babel": true,
+                    "hashFilename": true,
+                    "targetService": "nicolive",
+                    "nicolive": true
+                }
+            },
+            "globalScripts": []
+        };
+
+        document.querySelectorAll('.image-container img').forEach(img => {
+            img.addEventListener('dragover', event => event.preventDefault());
+            img.addEventListener('drop', handleDrop);
+            img.addEventListener('paste', handlePaste);
+        });
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            processFile(file, event.target);
+        }
+
+        function handlePaste(event) {
+            const items = event.clipboardData.items;
+            for (let item of items) {
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    processFile(file, event.target);
+                }
+            }
+        }
+
+        function processFile(file, target) {
+            const warningDiv = document.getElementById('warning');
+            warningDiv.textContent = '';
+
+            if (!file.type.startsWith('image/png') && !file.type.startsWith('image/jpeg')) {
+                warningDiv.textContent = 'Error: Only PNG and JPG images are supported.';
+                return;
+            }
+
+            const img = new Image();
+            img.onload = function() {
+                if (img.width < 10 || img.width > 500 || img.height < 10 || img.height > 500) {
+                    warningDiv.textContent = 'Error: Image dimensions must be between 10x10 and 500x500 pixels.';
+                    return;
+                }
+                updateImage(target, img.src, file.name);
+            };
+            img.onerror = function() {
+                warningDiv.textContent = 'Error: Invalid image file.';
+            };
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImage(target, dataUrl, fileName) {
+            target.src = dataUrl;
+            const assetKey = target.id;
+            const fileExtension = fileName.split('.').pop();
+            gameJson.assets[assetKey].path = `game/files/${assetKey}.${fileExtension}`;
+            gameJson.assets[assetKey].width = target.naturalWidth;
+            gameJson.assets[assetKey].height = target.naturalHeight;
+        }
+
+        document.getElementById('downloadZip').addEventListener('click', async () => {
+            const zip = new JSZip();
+            zip.file("game/game.json", JSON.stringify(gameJson, null, 2));
+
+            const fetchPromises = Object.keys(images).map(async key => {
+                const imgElement = document.getElementById(key);
+                const response = await fetch(imgElement.src);
+                const blob = await response.blob();
+                zip.file(`game/files/${key}.${blob.type.split('/').pop()}`, blob);
+            });
+
+            await Promise.all(fetchPromises);
+
+            zip.generateAsync({ type: "blob" }).then(content => {
+                saveAs(content, "game.zip");
+            });
+        });
+    </script>
+</body>
+</html>
