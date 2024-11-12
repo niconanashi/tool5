@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー8</h1>
+    <h1>出すツールメーカー9</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -141,7 +141,7 @@
         function updateImage(target, dataUrl, fileName) {
             target.src = dataUrl;
             const assetKey = target.id;
-            images[assetKey] = `files/${fileName}`;
+            images[assetKey] = `game/files/${fileName}`;
         }
 
         document.getElementById('downloadZip').addEventListener('click', async () => {
@@ -149,7 +149,7 @@
             
             const gameJson = await loadGameJson();
             Object.keys(images).forEach(key => {
-                gameJson.assets[key].path = images[key];
+                gameJson.assets[key].path = images[key].replace("game/files/", "files/");
                 const imgElement = document.getElementById(key);
                 gameJson.assets[key].width = imgElement.naturalWidth;
                 gameJson.assets[key].height = imgElement.naturalHeight;
