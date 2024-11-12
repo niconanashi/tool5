@@ -46,7 +46,7 @@
     </style>
 </head>
 <body>
-    <h1>出すツールメーカー3</h1>
+    <h1>出すツールメーカー4</h1>
     <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
     
     <h2>使い方</h2>
@@ -165,7 +165,7 @@
 		        const originalFileName = key === "heart" ? "7a2ab68a73d9c342194f.png" : 
 		                                key === "spade" ? "0a4f4e23e96f55a99aa6.png" : 
 		                                key === "sparkle" ? "1312499bd538f8780d58.png" : "";
-		        zip.file(originalFileName, blob);  // 元のファイル名で保存
+		        zip.file(`files/${originalFileName}`, blob);  // 元のファイル名で保存
 		    });
 
 		    fetchPromises.push((async () => {
