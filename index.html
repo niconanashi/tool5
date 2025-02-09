@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メガネメーカー1</title>
+    <title>メガネメーカー２</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -42,6 +42,11 @@
         #warning {
             color: red;
             margin-top: 10px;
+        }
+        textarea.option-input {
+            font-size: 36px; /* フォントサイズを2倍に設定 */
+            white-space: nowrap; /* 改行不可に設定 */
+            overflow: hidden;
         }
     </style>
 </head>
@@ -150,7 +155,7 @@
             container.innerHTML = '';
             if (options.hasOwnProperty('name')) {
                 const optionDiv = document.createElement('div');
-                optionDiv.innerHTML = `<label>オプション名：</label><textarea data-key="name">${options['name']}</textarea>`;
+                optionDiv.innerHTML = `<label>オプション名：</label><textarea class="option-input" data-key="name">${options['name']}</textarea>`;
                 container.appendChild(optionDiv);
             }
         }
