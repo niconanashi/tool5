@@ -27,7 +27,7 @@
 		"aez_bundle_main": {
 			"type": "script",
 			"global": true,
-			"path": "files/mainjs",
+			"path": "files/main.js",
 			"virtualPath": "script/aez_bundle_main.js"
 		}
 	},
