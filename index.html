@@ -1,162 +1,149 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>出すツールメーカー2</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-	<style>
-		body {
-			font-size: 18px;
-		}
-		.image-container {
-			display: flex;
-			gap: 20px;
-		}
-		.image-container div {
-			position: relative;
-			width: 150px;
-			height: 150px;
-			border: 1px solid #ddd;
-			text-align: center;
-			line-height: 150px;
-		}
-		.image-container img {
-			max-width: 100%;
-			max-height: 100%;
-		}
-		.image-container textarea {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			opacity: 0;
-		}
-		button {
-			font-size: 18px;
-			padding: 10px 20px;
-			margin: 20px;
-		}
-		#warning {
-			color: red;
-			margin-top: 10px;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>めがねメーカー</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-size: 18px;
+        }
+        .image-container {
+            display: flex;
+            gap: 20px;
+        }
+        .image-container div {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border: 1px solid #ddd;
+            text-align: center;
+            line-height: 150px;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .image-container textarea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 20px;
+        }
+        #warning {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-	<h1>出すツールメーカー2</h1>
-	<p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
-	<h2>使い方</h2>
-	<ol>
-		<li>表示されている画像にドラッグ＆ドロップまたはペーストで新しい画像に変更します。</li>
-		<li>変更した内容を含むZIPファイルをダウンロードボタンを押してダウンロードします。</li>
-		<li>ダウンロードしたファイルをニコ生ゲームとして投稿します。</li>
-	</ol>
-	<p>※画像はPNG形式で、幅と高さが10ピクセル以上500ピクセル以下である必要があります。</p>
-	<div class="image-container">
-		<div>
-			<img id="heart" src="game/files/heart.png" alt="heart">
-			<textarea></textarea>
-		</div>
-		<div>
-			<img id="spade" src="game/files/spade.png" alt="spade">
-			<textarea></textarea>
-		</div>
-		<div>
-			<img id="sparkle" src="game/files/sparkle.png" alt="sparkle">
-			<textarea></textarea>
-		</div>
-	</div>
-	<button id="downloadZip">game.zip をダウンロード</button>
-	<div id="warning"></div>
-	<script>
-		const images = {
-			"heart": "game/files/heart.png",
-			"spade": "game/files/spade.png",
-			"sparkle": "game/files/sparkle.png"
-		};
-		document.querySelectorAll('.image-container div').forEach(div => {
-			div.addEventListener('dragover', event => event.preventDefault());
-			div.addEventListener('drop', handleDrop);
-			div.querySelector('textarea').addEventListener('paste', handlePaste);
-		});
-		async function loadGameJson() {
-			const response = await fetch('game/game.json');
-			return await response.json();
-		}
-		function handleDrop(event) {
-			event.preventDefault();
-			const file = event.dataTransfer.files[0];
-			processFile(file, event.currentTarget.querySelector('img'));
-		}
-		function handlePaste(event) {
-			const items = event.clipboardData.items;
-			const target = event.currentTarget.parentNode.querySelector('img');
-			if (target) {
-				for (let item of items) {
-					if (item.kind === 'file') {
-						const file = item.getAsFile();
-						processFile(file, target);
-					}
-				}
-			}
-		}
-		function processFile(file, target) {
-			const warningDiv = document.getElementById('warning');
-			warningDiv.textContent = '';
-			if (!file.type.startsWith('image/png')) {
-				warningDiv.textContent = 'エラー：サポートされている画像形式はPNGのみです。';
-				return;
-			}
-			const img = new Image();
-			img.onload = function() {
-				if (img.width < 10 || img.width > 500 || img.height < 10 || img.height > 500) {
-					warningDiv.textContent = 'エラー：画像の寸法は10x10から500x500ピクセルの間である必要があります。';
-					return;
-				}
-				updateImage(target, img.src);
-			};
-			img.onerror = function() {
-				warningDiv.textContent = 'エラー：無効な画像ファイルです。';
-			};
-			const reader = new FileReader();
-			reader.onload = function(e) {
-				img.src = e.target.result;
-			};
-			reader.readAsDataURL(file);
-		}
-		function updateImage(target, dataUrl) {
-			target.src = dataUrl;
-			const assetKey = target.id;
-			images[assetKey] = dataUrl;
-		}
-		document.getElementById('downloadZip').addEventListener('click', async () => {
-			const zip = new JSZip();
-			const gameJson = await loadGameJson();
-			Object.keys(images).forEach(key => {
-				gameJson.assets[key].path = `files/${key}.png`;
-				const imgElement = document.getElementById(key);
-				gameJson.assets[key].width = imgElement.naturalWidth;
-				gameJson.assets[key].height = imgElement.naturalHeight;
-			});
-			zip.file("game.json", JSON.stringify(gameJson, null, 2));
-			const fetchPromises = Object.keys(images).map(async key => {
-				const imgDataUrl = images[key];
-				const blob = await fetch(imgDataUrl).then(res => res.blob());
-				zip.file(`files/${key}.png`, blob);
-			});
-			fetchPromises.push((async () => {
-				const response = await fetch('game/files/main.js');
-				const blob = await response.blob();
-				zip.file('files/main.js', blob);
-			})());
-			await Promise.all(fetchPromises);
-			zip.generateAsync({ type: "blob" }).then(content => {
-				saveAs(content, "game.zip");
-			});
-		});
-	</script>
+    <h1>めがねメーカー</h1>
+    <p>このページを使って、ニコ生ゲームの投稿ファイル（game.zip）を簡単に作成できます。</p>
+    <h2>使い方</h2>
+    <ol>
+        <li>表示されている画像にドラッグ＆ドロップまたはペーストで新しい画像に変更します。</li>
+        <li>変更した内容を含むZIPファイルをダウンロードボタンを押してダウンロードします。</li>
+        <li>ダウンロードしたファイルをニコ生ゲームとして投稿します。</li>
+    </ol>
+    <p>※画像はPNG形式で、幅と高さが600ピクセルである必要があります。</p>
+    <div class="image-container">
+        <div>
+            <img id="megane1" src="game/files/heart.png" alt="heart">
+            <textarea></textarea>
+        </div>
+        <div>
+            <img id="megane2" src="game/files/spade.png" alt="spade">
+            <textarea></textarea>
+        </div>
+    </div>
+    <button id="downloadZip">game.zip をダウンロード</button>
+    <div id="warning"></div>
+    <script>
+        const images = {
+            "megane1": "game/files/megane1.png",
+            "megane2": "game/files/megane2.png"
+        };
+        document.querySelectorAll('.image-container div').forEach(div => {
+            div.addEventListener('dragover', event => event.preventDefault());
+            div.addEventListener('drop', handleDrop);
+            div.querySelector('textarea').addEventListener('paste', handlePaste);
+        });
+        function handleDrop(event) {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            processFile(file, event.currentTarget.querySelector('img'));
+        }
+        function handlePaste(event) {
+            const items = event.clipboardData.items;
+            const target = event.currentTarget.parentNode.querySelector('img');
+            if (target) {
+                for (let item of items) {
+                    if (item.kind === 'file') {
+                        const file = item.getAsFile();
+                        processFile(file, target);
+                    }
+                }
+            }
+        }
+        function processFile(file, target) {
+            const warningDiv = document.getElementById('warning');
+            warningDiv.textContent = '';
+            if (!file.type.startsWith('image/png')) {
+                warningDiv.textContent = 'エラー：サポートされている画像形式はPNGのみです。';
+                return;
+            }
+            const img = new Image();
+            img.onload = function() {
+                if (img.width !== 600 || img.width !== 600) {
+                    warningDiv.textContent = 'エラー：画像の寸法は600x600ピクセルである必要があります。';
+                    return;
+                }
+                updateImage(target, img.src);
+            };
+            img.onerror = function() {
+                warningDiv.textContent = 'エラー：無効な画像ファイルです。';
+            };
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        function updateImage(target, dataUrl) {
+            target.src = dataUrl;
+            const assetKey = target.id;
+            images[assetKey] = dataUrl;
+        }
+        document.getElementById('downloadZip').addEventListener('click', async () => {
+            const zip = new JSZip();
+            await fetch('game/game.json').then(async (response) => {
+                const blob = await response.blob();
+                zip.file('game.json', blob);
+            });
+            const fetchPromises = Object.keys(images).map(async key => {
+                const imgDataUrl = images[key];
+                const blob = await fetch(imgDataUrl).then(res => res.blob());
+                zip.file(`files/${key}.png`, blob);
+            });
+            fetchPromises.push((async () => {
+                const response = await fetch('game/files/main.js');
+                const blob = await response.blob();
+                zip.file('files/main.js', blob);
+            })());
+            await Promise.all(fetchPromises);
+            zip.generateAsync({ type: "blob" }).then(content => {
+                saveAs(content, "game.zip");
+            });
+        });
+    </script>
 </body>
 </html>
