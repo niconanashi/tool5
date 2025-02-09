@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メガネメーカー２</title>
+    <title>メガネメーカー</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -47,6 +47,9 @@
             font-size: 36px; /* フォントサイズを2倍に設定 */
             white-space: nowrap; /* 改行不可に設定 */
             overflow: hidden;
+            resize: none; /* サイズ変更を無効に設定 */
+            height: auto; /* 高さを自動調整 */
+            width: 100%; /* 幅を親要素に合わせる */
         }
     </style>
 </head>
