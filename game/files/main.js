@@ -47,165 +47,239 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
   }()({
     1: [function (require, module, exports) {
       function main(param) {
-        var scale = 1; //画像の拡大率
         var scene = new g.Scene({
           game: g.game,
-          assetIds: ["heart", "spade", "sparkle"]
+          assetPaths: ["/**/*"]
         });
-        var color = "heart";
-        scene.loaded.add(function () {
-          function generateHeart(x, y, color) {
-            // heart変数にheart画像のSpriteを追加
-            var heart = new g.Sprite({
-              scene: scene,
-              src: scene.assets[color],
-              parent: container,
-              x: x,
-              y: y,
-              anchorX: 0.5,
-              anchorY: 0.5,
-              scaleX: scale,
-              scaleY: scale,
-              tag: {
-                counter: 0
-              }
-            });
-            // 毎フレーム実行されるイベントであるupdateにイベントを登録
-            heart.update.add(function (e) {
-              // 毎フレームカウンタを追加
-              heart.tag.counter++;
-              if (heart.tag.counter > 100) {
-                // カウンタが100を超えていたら削除する
-                heart.destroy();
-              } else if (heart.tag.counter > 50) {
-                // カウンタが50を超えていたら半透明にしていく
-                heart.opacity = (100 - heart.tag.counter) / 50;
-                // このエンティティが変更されたという通知
-                heart.modified();
-              }
-            });
-          }
-          // イベント取得用に、ローカルエンティティを透明で作成
-          var container = new g.E({
+        scene.onLoad.add(function () {
+          var broadcasterPlayerId;
+          g.game.onJoin.add(function (e) {
+            broadcasterPlayerId = e.player.id;
+          });
+          var m1 = new g.Sprite({
             scene: scene,
-            x: 0,
-            y: 0,
-            width: g.game.width,
-            height: g.game.height,
+            src: scene.assets["megane1"],
+            x: 640,
+            y: 360,
             touchable: true,
-            local: true,
+            anchorX: 0.5,
+            anchorY: 0.5,
+            scaleX: 0.5,
+            scaleY: 0.5,
             parent: scene
           });
-          // ローカルエンティティのpointDownトリガーに関数を登録
-          container.pointDown.add(function (e) {
-            // タッチされたらローカル情報と座標情報を基にイベントを生成
-            g.game.raiseEvent(new g.MessageEvent({
-              type: "generate-heart",
-              color: color,
-              x: e.point.x,
-              y: e.point.y
-            }));
-          });
-          // Messageイベントを受け取るためのハンドラを登録
-          scene.message.add(function (e) {
-            // イベント種別を見て
-            var data = e.data;
-            if (data.type === "generate-heart") {
-              // 色と座標情報を基にハートを作成
-              generateHeart(data.x, data.y, data.color);
+          m1.onPointMove.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              m1.x += e.prevDelta.x;
+              m1.y += e.prevDelta.y;
+              if (m1.x < 0) {
+                m1.x = -0;
+              }
+              if (m1.x > 1280) {
+                m1.x = 1280;
+              }
+              if (m1.y < 0) {
+                m1.y = 0;
+              }
+              if (m1.y > 740) {
+                m1.y = 740;
+              }
+              m1.modified();
             }
           });
-          // ---- ここからコントロールパネル。基本は全てローカルエンティティとして処理
-          // コントロールパネルを作成。クリッピングをするためPaneを使う
-          var controlPanel = new g.Pane({
+          var btn = new g.FilledRect({
             scene: scene,
-            x: g.game.width - 96,
-            y: 64,
-            width: 74,
-            height: 74,
-            local: true,
-            tag: {
-              expand: false
-            },
+            x: 1100,
+            y: 30,
+            cssColor: sliderBgColor,
+            width: 80,
+            height: 40,
+            opacity: 0.8,
+            touchable: true,
             parent: scene
           });
-          // コントロールパネルの開閉スイッチを配置
-          var panelSwitch = new g.FilledRect({
-            scene: scene,
-            x: 10,
-            y: 0,
-            width: 64,
-            height: 64,
-            cssColor: "#ccc",
-            local: true,
-            touchable: true,
-            parent: controlPanel
-          });
-          // 選択されているツールにつける枠
-          var activeTool = new g.FilledRect({
-            scene: scene,
-            x: 14,
-            // 座標はオープン時に計算するので仮
-            y: 94,
-            cssColor: "#f79",
-            width: 68,
-            height: 68,
-            opacity: 0.5,
-            local: true,
-            parent: controlPanel
-          });
-          // コントロールパネルに表示するツールアイコンを作成する関数
-          function createTool(assetId, y) {
-            var tool = new g.Sprite({
-              scene: scene,
-              src: scene.assets[assetId],
-              x: 16,
-              y: y,
-              parent: controlPanel,
-              local: true,
-              touchable: true,
-              tag: {
-                selected: true,
-                assetId: assetId
+          btn.onPointDown.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              if (m1.src == scene.assets["megane1"]) {
+                m1.src = scene.assets["megane2"];
+              } else {
+                m1.src = scene.assets["megane1"];
               }
-            });
-            // ツールアイコンは使いまわすのでリサイズしておく
-            tool.width = 64;
-            tool.height = 64;
-            tool.invalidate();
-            // このツールを選択した結果を反映
-            tool.pointDown.add(function (e) {
-              color = tool.tag.assetId;
-              activeTool.x = e.target.x - 2;
-              activeTool.y = e.target.y - 2;
-              activeTool.modified();
-            });
-            return tool;
-          }
-          var tools = [];
-          // 用意するツールは三種類
-          tools.push(createTool("heart", 96));
-          tools.push(createTool("spade", 192));
-          tools.push(createTool("sparkle", 288));
-          // 開閉スイッチに触れたらコントロールパネルを開く
-          panelSwitch.pointDown.add(function (e) {
-            controlPanel.tag.expand = !controlPanel.tag.expand;
-            if (controlPanel.tag.expand) {
-              // 展開する
-              controlPanel.height = 384;
-              controlPanel.width = 96;
-            } else {
-              // 折りたたむ
-              controlPanel.height = 74;
-              controlPanel.width = 74;
+              m1.invalidate();
             }
-            controlPanel.invalidate();
           });
-          // ここまでコントロールパネル ---- 
-
-          // 最初に中心にハートを出現させる
-          generateHeart(g.game.width / 2 - scene.assets["heart"].width / 2, g.game.height / 2 - scene.assets["heart"].height / 2, color);
+          var slider = new g.FilledRect({
+            scene: scene,
+            x: 300 - 100,
+            y: 30,
+            cssColor: sliderBgColor,
+            width: 320,
+            height: 40,
+            opacity: 0.8,
+            touchable: true,
+            parent: scene
+          });
+          var slider2 = new g.FilledRect({
+            scene: scene,
+            x: 5,
+            y: 5,
+            cssColor: sliderColor,
+            width: 300 * m1.scaleX,
+            height: 30,
+            parent: slider
+          });
+          var slider3 = new g.FilledRect({
+            scene: scene,
+            x: 300 * m1.scaleX,
+            y: 0,
+            cssColor: sliderHandleColor,
+            width: 10,
+            height: 30,
+            parent: slider2
+          });
+          var sliderPoint = slider3.x;
+          slider.onPointDown.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              sliderPoint = e.point.x - 10;
+              slider3.x = sliderPoint;
+              if (slider3.x > 300) {
+                slider3.x = 300;
+              }
+              if (slider3.x < 20) {
+                slider3.x = 20;
+              }
+              slider2.width = slider3.x;
+              slider3.modified();
+              m1.scaleX = slider3.x / 300;
+              m1.scaleY = m1.scaleX;
+              m1.modified();
+            }
+          });
+          slider.onPointMove.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              sliderPoint += e.prevDelta.x;
+              slider3.x = sliderPoint;
+              if (slider3.x > 300) {
+                slider3.x = 300;
+              }
+              if (slider3.x < 20) {
+                slider3.x = 20;
+              }
+              slider2.width = slider3.x;
+              slider3.modified();
+              m1.scaleX = slider3.x / 300;
+              m1.scaleY = m1.scaleX;
+              m1.modified();
+            }
+          });
+          var angleSlider = new g.FilledRect({
+            scene: scene,
+            x: 700,
+            y: 30,
+            cssColor: sliderBgColor,
+            width: 320,
+            height: 40,
+            opacity: 0.8,
+            touchable: true,
+            parent: scene
+          });
+          var angleSlider2 = new g.FilledRect({
+            scene: scene,
+            x: 5,
+            y: 5,
+            cssColor: sliderColor,
+            width: 150 + m1.angle,
+            height: 30,
+            parent: angleSlider
+          });
+          var angleSlider3 = new g.FilledRect({
+            scene: scene,
+            x: 150 + m1.angle,
+            y: 0,
+            cssColor: sliderHandleColor,
+            width: 10,
+            height: 30,
+            parent: angleSlider2
+          });
+          var angleSliderPoint = angleSlider3.x;
+          angleSlider.onPointDown.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              angleSliderPoint = e.point.x - 10;
+              angleSlider3.x = angleSliderPoint;
+              if (angleSlider3.x > 300) {
+                angleSlider3.x = 300;
+              }
+              if (angleSlider3.x < 0) {
+                angleSlider3.x = 0;
+              }
+              angleSlider2.width = angleSlider3.x;
+              angleSlider3.modified();
+              m1.angle = (angleSlider3.x - 150) * (maxAngle / 150);
+              m1.modified();
+            }
+          });
+          angleSlider.onPointMove.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              angleSliderPoint += e.prevDelta.x;
+              angleSlider3.x = angleSliderPoint;
+              if (angleSlider3.x > 300) {
+                angleSlider3.x = 300;
+              }
+              if (angleSlider3.x < 0) {
+                angleSlider3.x = 0;
+              }
+              angleSlider2.width = angleSlider3.x;
+              angleSlider3.modified();
+              m1.angle = (angleSlider3.x - 150) * (maxAngle / 150);
+              m1.modified();
+            }
+          });
+          var font1 = new g.DynamicFont({
+            game: g.game,
+            fontFamily: "sans-serif",
+            size: 50,
+            fontWeight: 1
+          });
+          var sliderLabel = new g.Label({
+            scene: scene,
+            font: font1,
+            text: "大きさ",
+            textColor: textColor,
+            fontSize: 24,
+            x: 5,
+            y: 5,
+            parent: slider
+          });
+          var angleSliderLabel = new g.Label({
+            scene: scene,
+            font: font1,
+            text: "角度",
+            textColor: textColor,
+            fontSize: 24,
+            x: 5,
+            y: 5,
+            parent: angleSlider
+          });
+          var btnLabel = new g.Label({
+            scene: scene,
+            font: font1,
+            text: option,
+            textColor: textColor,
+            fontSize: 24,
+            x: 5,
+            y: 6,
+            parent: btn
+          });
+          btn.width = btnLabel.width + 10;
+          btn.modified();
         });
+        var open = true; //放送者以外も操作可能か
+        var sliderBgColor = "gray"; //スライダーの背景色
+        var sliderColor = "lightblue"; //スライダーのバーの色
+        var sliderHandleColor = "white"; //スライダーのハンドルの色
+        var textColor = "black"; //文字の色
+        var option = "ヒゲ"; //オプション名
+        var maxAngle = 60; //最大角度
         g.game.pushScene(scene);
       }
       module.exports = main;
