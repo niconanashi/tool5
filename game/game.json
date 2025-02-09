@@ -24,6 +24,11 @@
 			},
 			"virtualPath": "image/megane2.png"
 		},
+		"option": {
+			"type": "text",
+			"path": "files/option.json",
+			"virtualPath": "text/option.json"
+		},
 		"aez_bundle_main": {
 			"type": "script",
 			"global": true,
