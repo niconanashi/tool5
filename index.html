@@ -103,7 +103,7 @@
             }
             const img = new Image();
             img.onload = function() {
-                if (img.width !== 600 || img.width !== 600) {
+                if (img.width !== 600 || img.height !== 600) {
                     warningDiv.textContent = 'エラー：画像の寸法は600x600ピクセルである必要があります。';
                     return;
                 }
