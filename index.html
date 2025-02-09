@@ -46,7 +46,6 @@
         input.option-input {
             font-size: 36px; /* フォントサイズを2倍に設定 */
             width: 10ch; /* 10文字幅に設定 */
-            height: auto; /* 高さを自動調整 */
         }
     </style>
 </head>
@@ -155,4 +154,44 @@
             container.innerHTML = '';
             if (options.hasOwnProperty('name')) {
                 const optionDiv = document.createElement('div');
-                optionDiv.innerHTML = `<label>オプション名：</label><input type="text" class="option-input" data-key="name" value
+                optionDiv.innerHTML = `<label>オプション名：</label><input class="option-input" type="text" data-key="name" value="${options['name']}">`;
+                container.appendChild(optionDiv);
+            }
+        }
+
+        document.getElementById('downloadZip').addEventListener('click', async () => {
+            const zip = new JSZip();
+            const gameJson = await loadGameJson();
+
+            Object.keys(images).forEach(key => {
+                gameJson.assets[key].path = `files/${key}.png`;
+                const imgElement = document.getElementById(key);
+                gameJson.assets[key].width = imgElement.naturalWidth;
+                gameJson.assets[key].height = imgElement.naturalHeight;
+            });
+
+            const input = document.querySelector('#optionContainer input');
+            options['name'] = input.value;
+            zip.file("files/option.json", JSON.stringify(options, null, 2));
+
+            zip.file("game.json", JSON.stringify(gameJson, null, 2));
+
+            const fetchPromises = Object.keys(images).map(async key => {
+                const imgDataUrl = images[key];
+                const blob = await fetch(imgDataUrl).then(res => res.blob());
+                zip.file(`files/${key}.png`, blob);
+            });
+            fetchPromises.push((async () => {
+                const response = await fetch('game/files/main.js');
+                const blob = await response.blob();
+                zip.file('files/main.js', blob);
+            })());
+
+            await Promise.all(fetchPromises);
+            zip.generateAsync({ type: "blob" }).then(content => {
+                saveAs(content, "game.zip");
+            });
+        });
+    </script>
+</body>
+</html>
