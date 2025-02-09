@@ -50,6 +50,7 @@
             resize: none; /* サイズ変更を無効に設定 */
             height: 1.2em; /* 1行の高さに設定 */
             width: 10ch; /* 10文字幅に設定 */
+            line-height: 1.2em; /* 行の高さに合わせる */
         }
     </style>
 </head>
@@ -158,7 +159,7 @@
             container.innerHTML = '';
             if (options.hasOwnProperty('name')) {
                 const optionDiv = document.createElement('div');
-                optionDiv.innerHTML = `<label>オプション名：</label><textarea class="option-input" data-key="name">${options['name']}</textarea>`;
+                optionDiv.innerHTML = `<label>オプション名：</label><textarea class="option-input" data-key="name" rows="1" cols="10">${options['name']}</textarea>`;
                 container.appendChild(optionDiv);
             }
         }
