@@ -52,6 +52,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           assetPaths: ["/**/*"]
         });
         scene.onLoad.add(function () {
+          var option = scene.asset.getJSONContent("/text/option.json");
+          var optionName = option.name;
           var broadcasterPlayerId;
           g.game.onJoin.add(function (e) {
             broadcasterPlayerId = e.player.id;
@@ -68,12 +70,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             scaleY: 0.5,
             parent: scene
           });
+          var pointX = m1.x;
+          var pointY = m1.y;
           m1.onPointMove.add(function (e) {
             if (broadcasterPlayerId == e.player.id || open) {
               m1.x += e.prevDelta.x;
               m1.y += e.prevDelta.y;
               if (m1.x < 0) {
-                m1.x = -0;
+                m1.x = 0;
               }
               if (m1.x > 1280) {
                 m1.x = 1280;
@@ -85,6 +89,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 m1.y = 740;
               }
               m1.modified();
+              pointX = m1.x;
+              pointY = m1.y;
+            }
+          });
+          m1.onPointDown.add(function (e) {
+            if (broadcasterPlayerId == e.player.id || open) {
+              pointX = m1.x;
+              pointY = m1.y;
             }
           });
           var btn = new g.FilledRect({
@@ -110,7 +122,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           });
           var slider = new g.FilledRect({
             scene: scene,
-            x: 300 - 100,
+            x: 200,
             y: 30,
             cssColor: sliderBgColor,
             width: 320,
@@ -263,7 +275,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           var btnLabel = new g.Label({
             scene: scene,
             font: font1,
-            text: option,
+            text: optionName,
             textColor: textColor,
             fontSize: 24,
             x: 5,
@@ -278,7 +290,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         var sliderColor = "lightblue"; //スライダーのバーの色
         var sliderHandleColor = "white"; //スライダーのハンドルの色
         var textColor = "black"; //文字の色
-        var option = "ヒゲ"; //オプション名
         var maxAngle = 60; //最大角度
         g.game.pushScene(scene);
       }
